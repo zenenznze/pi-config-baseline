@@ -20,7 +20,7 @@
       "threshold": 78
     },
     "summaryProvider": "deepseek",
-    "summaryModel": "deepseek-flash",
+    "summaryModel": "deepseek-v4-flash",
     "fallback": "Pi built-in compaction with the active session model; no fixed fallback model",
     "summaryMaxTokens": 8192,
     "nativeSettings": {
@@ -162,7 +162,7 @@
       "id": "dedicated-compaction-model",
       "path": "~/.pi/agent/extensions/dedicated-compaction-model.ts",
       "provider": "deepseek",
-      "model": "deepseek-flash"
+      "model": "deepseek-v4-flash"
     }
   ],
   "forbiddenActiveSources": [

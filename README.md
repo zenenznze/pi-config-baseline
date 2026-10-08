@@ -18,6 +18,9 @@ installed from public npm sources with the baseline's exact versions.
 Merge the selected platform fragment and `pi` preferences into your own
 Pi settings, and install the listed `recommendedPackages`. Do not overwrite
 existing settings wholesale. Configure provider credentials locally, outside Git.
+The summary model is explicitly pinned to `deepseek/deepseek-v4-flash` (DeepSeek V4 Flash),
+not the unversioned `deepseek-flash` ID. A stale local model catalog must not
+change this configured identity. Model availability is checked separately.
 The dedicated DeepSeek compaction extension is an external prerequisite; its
 implementation and credentials are intentionally not distributed here.
 This snapshot documents our configuration, not a universal recommendation;
