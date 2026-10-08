@@ -1,0 +1,4 @@
+{
+  "defaultTools": ["read", "edit", "write", "grep", "find", "ls", "powershell", "codemode"],
+  "codemode": { "mode": "only" }
+}

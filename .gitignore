@@ -1,0 +1,17 @@
+# Credentials and local runtime state
+.env
+.env.*
+!.env.example
+auth.json
+settings.json
+models.json
+*.pem
+*.key
+*.p12
+*.pfx
+.pi/
+sessions/
+accounts/
+node_modules/
+__pycache__/
+.DS_Store
