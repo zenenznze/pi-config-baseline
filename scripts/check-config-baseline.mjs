@@ -74,13 +74,14 @@ function check({ agentDir, platform }) {
     const profile = readJson(path.join(root, baseline.toolConfiguration.profiles[name]), null);
     const shell = name === "windows-native" ? "powershell" : "bash";
     const expected = ["read", "edit", "write", "grep", "find", "ls", shell, "codemode"];
-    if (JSON.stringify(profile?.defaultTools) !== JSON.stringify(expected) || profile?.codemode?.mode !== "only") {
+    if (JSON.stringify(profile?.defaultTools) !== JSON.stringify(expected) || profile?.codemode?.mode !== baseline.toolConfiguration.codemode.mode) {
       issues.push(`invalid platform profile: ${name}`);
     }
   }
   const profile = readJson(path.join(root, baseline.toolConfiguration.profiles[platform]), null);
   if (JSON.stringify(settings.defaultTools) !== JSON.stringify(profile.defaultTools)) issues.push(`settings.defaultTools differs from ${platform} profile`);
-  if (settings.codemode?.mode !== "only") issues.push("settings.codemode.mode must be only");
+  if (baseline.toolConfiguration.codemode.mode !== "on") issues.push("baseline.toolConfiguration.codemode.mode must be on");
+  if (settings.codemode?.mode !== baseline.toolConfiguration.codemode.mode) issues.push(`settings.codemode.mode must be ${baseline.toolConfiguration.codemode.mode}`);
   if ((settings.extensions ?? []).includes("-builtin:codemode")) issues.push("built-in codemode extension is disabled");
   const autoCompact = readJson(path.join(agentDir, baseline.autoCompaction.configFile), null);
   if (autoCompact?.threshold !== baseline.autoCompaction.config.threshold) issues.push("Auto Compact threshold differs from preserved baseline");

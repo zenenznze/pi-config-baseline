@@ -11,7 +11,8 @@ This is **not a Pi Package**: do not run `pi install` on this repository.
 - `scripts/check-config-baseline.mjs`: read-only configuration checker.
 - `snapshot.json`: source revision for this exported snapshot.
 
-Recommended Pi version: **0.99.2**. Code Mode is enabled in `only` mode.
+Recommended Pi version: **0.99.2**. Code Mode is enabled in hybrid `on` mode; native tools are directly callable.
+See [tool selection and mode rollback](docs/codemode.md).
 Windows Native uses PowerShell; Linux/WSL uses Bash. Plugin packages are
 installed from public npm sources with the baseline's exact versions.
 
