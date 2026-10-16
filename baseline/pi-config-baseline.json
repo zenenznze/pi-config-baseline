@@ -1,6 +1,20 @@
 {
   "schemaVersion": 2,
-  "recommendedPiVersion": "0.99.2",
+  "recommendedPiVersion": "1.1.0",
+  "minimumNodeVersion": "22.19.0",
+  "upgradeVerification": {
+    "testedPiVersion": "1.1.0",
+    "auditDate": "2026-10-10",
+    "status": "partial",
+    "evidence": "docs/pi-1.1.0-upgrade.md",
+    "pending": [
+      "MCP lifecycle",
+      "full session resume",
+      "long-session end-to-end compaction",
+      "Windows/WSL runtime",
+      "authenticated plugin integrations"
+    ]
+  },
   "toolConfiguration": {
     "codemode": {
       "mode": "on"
@@ -13,18 +27,28 @@
     "apply": "Merge only the selected platform fragment into your local settings.json; preserve unrelated settings. Restart Pi after tool removal."
   },
   "autoCompaction": {
-    "package": "npm:pi-auto-compact@1.2.3",
+    "package": "npm:pi-auto-compact@1.3.1",
     "repository": "https://github.com/Chasen-Liao/pi-auto-compact",
     "configFile": "pi-auto-compact.json",
     "config": {
-      "threshold": 78
+      "threshold": 78,
+      "alignPiThreshold": true
     },
-    "summaryProvider": "deepseek",
-    "summaryModel": "deepseek-v4-flash",
+    "exactPiModelBudgets": [
+      {
+        "contextWindow": 1000000,
+        "compactAtTokens": 300000
+      }
+    ],
+    "exactPiModelBudgetNote": "Two rules, applied by the registered context window of each model. (1) A model with this window keeps an exact compact point instead of a percentage: the device writes settings.compaction.modelOverrides[<provider>/<modelId>].reserveTokens = contextWindow - compactAtTokens = 700000, so Pi compacts exactly when cached context passes 300000 tokens. Pi checks contextTokens > contextWindow - reserveTokens before a prompt, between tool batches, and during overflow recovery, so one per-model number covers all three. (2) Every other model keeps the original 78% threshold through pi-auto-compact (preflight before a prompt) plus its alignment of the same 78% into Pi's per-model reserve (mid-run). Keeping the exact budget out of pi-auto-compact's alignedReserveTokens record matters: an unmanaged per-model reserve is treated as user-owned and left alone, while the same entry in the record would be overwritten with the 78%-derived 220000. The 1M window is magpie's own advertisement for the smart-split group and the DeepSeek models (GET /v1/models reports context_length/context_window 1000000, max_output_tokens 393216; codex members report 272000 and workbuddy/hy3 192000). magpie's routing log still shows the smart-split group's DeepSeek-first member degrading above about 300000 tokens (median 4.2 s at 150000-300000 cached, 17 s median / 44 s average above 300000, 69-120 s at about 500000), which is why the larger windows keep this exact cap rather than their full capacity; a global percentage cannot express it, because 30% of 1M is 300000 but 30% of 272000 would compact those models at 81600 tokens.",
+    "summaryModel": "active session model",
+    "summaryModelNote": "The summarizer extension follows ctx.model instead of pinning a model, so the magpie routing group decides the backend: its compacting rule sends a compaction request to the Go-first DeepSeek group and passes over a member that cannot take a request as long as the whole conversation.",
+    "compactionMarker": "You are a context summarization assistant.",
+    "compactionMarkerNote": "magpie tells an agent compacting its conversation by this system prompt; the extension sends Pi's native summarization system prompt verbatim, or the request would be routed by intent instead of by the group's compaction rule.",
     "fallback": "Pi built-in compaction with the active session model; no fixed fallback model",
     "summaryMaxTokens": 8192,
     "nativeSettings": {
-      "policy": "Preserve existing overrides; these are effective 0.99.2 defaults, not newly imposed settings",
+      "policy": "Preserve existing overrides; these are effective 1.1.0 defaults, not newly imposed settings",
       "enabled": true,
       "reserveTokens": 16384,
       "keepRecentTokens": 20000
@@ -32,12 +56,58 @@
   },
   "repository": "https://github.com/zenenznze/pi-config-baseline.git",
   "purpose": "Non-secret Pi configuration baseline and recommended runtime composition. This repository is not a Pi Package and must not be installed by Pi.",
+  "defaultModelMatch": "suffix",
+  "modelMetadata": [
+    {
+      "provider": "magpie",
+      "modelId": "smart-split",
+      "match": "suffix",
+      "contextWindow": 1000000,
+      "source": "User-confirmed 1M context window on 2026-10-13; magpie's own GET /v1/models reports context_length/context_window 1000000 with max_output_tokens 393216 on 2026-10-14; upstream capacity was not load-tested"
+    },
+    {
+      "provider": "magpie",
+      "modelId": "deepseek/deepseek-flash",
+      "match": "suffix",
+      "contextWindow": 1000000,
+      "source": "magpie GET /v1/models reports context_length/context_window 1000000 with max_output_tokens 393216"
+    },
+    {
+      "provider": "magpie",
+      "modelId": "deepseek/deepseek-v4-pro",
+      "match": "suffix",
+      "contextWindow": 1000000,
+      "source": "magpie GET /v1/models reports context_length/context_window 1000000 with max_output_tokens 393216"
+    },
+    {
+      "provider": "magpie",
+      "modelId": "codex/",
+      "match": "contains",
+      "contextWindow": 272000,
+      "source": "magpie GET /v1/models reports context_length/context_window 272000 with max_output_tokens 128000 for every codex member"
+    },
+    {
+      "provider": "magpie",
+      "modelId": "workbuddy/hy3",
+      "match": "suffix",
+      "contextWindow": 192000,
+      "source": "magpie GET /v1/models reports context_length/context_window 192000 with max_output_tokens 64000"
+    },
+    {
+      "provider": "deepseek",
+      "modelId": "deepseek-v4-flash",
+      "match": "exact",
+      "contextWindow": 1000000,
+      "source": "Direct DeepSeek provider entry on this device; same 1M window as the magpie-routed DeepSeek models"
+    }
+  ],
   "pi": {
-    "defaultProvider": "openai-codex",
-    "defaultModel": "gpt-6.1-sol",
+    "defaultProvider": "magpie",
+    "defaultModel": "smart-split",
     "defaultThinkingLevel": "low",
     "theme": "light",
-    "hideThinkingBlock": true
+    "hideThinkingBlock": true,
+    "tuiMode": "regular"
   },
   "recommendedPackages": [
     {
@@ -49,7 +119,9 @@
     },
     {
       "id": "pi-auto-compact",
-      "source": "npm:pi-auto-compact@1.2.3",
+      "source": "npm:pi-auto-compact@1.3.1",
+      "integrity": "sha512-ca7pMrJvcprif46SY63RRMh+Os/xteA6yf+FHAeZZRvzJd4fnGWiUMn502vWHjGiivbDlGe2U8cbrOlvp3/PSA==",
+      "npmGitHead": "96aaef869ef43d375082712933bf7fccf54d45c9",
       "repository": "https://github.com/Chasen-Liao/pi-auto-compact",
       "expectedCommands": [
         "compact-threshold"
@@ -89,7 +161,7 @@
     },
     {
       "id": "pi-session-search",
-      "source": "npm:pi-session-search@1.6.0",
+      "source": "npm:@leo_aifirst/pi-session-search@1.7.0",
       "expectedCommands": [
         "session-embeddings-setup",
         "session-sync",
@@ -102,7 +174,9 @@
       ],
       "expectedSkills": [
         "session-history"
-      ]
+      ],
+      "repository": "https://github.com/zenenznze/pi-session-search.git",
+      "ref": "91dd42d366193abba9264e9a2f1bc11d6db66cc9"
     }
   ],
   "retiredPackages": [
@@ -155,14 +229,54 @@
         "version": "1.0.0",
         "integrity": "sha512-V6CZvQOBPE5BxnHX0EO9qiGR+HZGV8rftNNTP4Av5m+zzcYvDd2xLHCE1aT9dfpFklo8bP/MysmOv8jgAlcbWQ=="
       }
+    },
+    {
+      "id": "pi-session-search",
+      "repository": "https://github.com/zenenznze/pi-session-search.git",
+      "ref": "91dd42d366193abba9264e9a2f1bc11d6db66cc9",
+      "releaseBranch": "main",
+      "upstream": "https://github.com/samfoy/pi-session-search.git",
+      "syncPolicy": "Fork of upstream pi-session-search v1.6.0 (5a910e7c3a238d347e90020147815227b567b85e). Fetch upstream, review and merge validated upstream changes into this fork, run the fork tests, then advance this ref only after the fork commit is pushed to the public source repository and verified.",
+      "npm": {
+        "name": "@leo_aifirst/pi-session-search",
+        "version": "1.7.0",
+        "integrity": "sha512-6k9G0Mmal51usFBaOsrz75lSioLYg41Rk/LfynZTOPYFa7FQiktfDGUM9wPoL5L0/tLVC4NuCSmeKNV1pYF9kw=="
+      },
+      "runtimeAssertions": [
+        {
+          "path": "src/literal-search.ts",
+          "includes": [
+            "export async function searchLiteral"
+          ]
+        },
+        {
+          "path": "src/index.ts",
+          "includes": [
+            "literal mode for exact project paths"
+          ]
+        },
+        {
+          "path": "src/parser.ts",
+          "includes": [
+            "successful results with arguments, including codemode nested calls."
+          ]
+        }
+      ]
     }
   ],
   "independentRuntimeExtensions": [
     {
       "id": "dedicated-compaction-model",
       "path": "~/.pi/agent/extensions/dedicated-compaction-model.ts",
-      "provider": "deepseek",
-      "model": "deepseek-v4-flash"
+      "role": "Summarizes a compaction with the session's active model, sending Pi's native summarization system prompt and keeping the 8192-token summary cap; returns without a summary when the model is missing, the request fails, or the summary is empty, so Pi's own compaction takes over",
+      "roleNote": "Keeps its historical file name; it no longer pins a provider or model, so no device-local model id is declared here. This file is the only copy of the implementation, so the repository versions it; it stays outside the public export allowlist"
+    },
+    {
+      "id": "moshi-hooks",
+      "path": "~/.pi/agent/extensions/moshi-hooks.ts",
+      "generatedBy": "moshi-hook",
+      "role": "Normalizes Pi lifecycle events and writes them to the moshi-hook daemon socket (named pipe on Windows); a missing daemon fails silently and never interrupts a turn",
+      "roleNote": "Auto-generated by moshi-hook and regenerated by that tool, so only its presence is declared here; do not treat this file as hand-maintained source"
     }
   ],
   "forbiddenActiveSources": [
@@ -181,5 +295,5 @@
     "baselineCheck": "node scripts/check-config-baseline.mjs --agent-dir ~/.pi/agent"
   },
   "secretsExcluded": true,
-  "lastVerified": "2026-10-01"
+  "lastVerified": "2026-10-13"
 }

@@ -1,8 +1,4 @@
 {
-  "sourceRevision": "946f79ce709be190a44bc6ebf28377f16274e124",
-  "publication": "allowlisted snapshot; no source Git history",
-  "configurationPatch": {
-    "sourceRevision": "9f3f0da15c2fa7c65cee71cf9ce09be4998c5808",
-    "scope": "Code Mode on, platform profiles, structural checker and tool-selection guidance; other snapshot configuration preserved"
-  }
+  "sourceRevision": "319a532a097e3db9f3cb116e0acf4d0ea92b2c41",
+  "publication": "allowlisted snapshot; no source Git history"
 }
