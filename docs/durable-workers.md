@@ -58,6 +58,10 @@ without reloading or restarting another working Agent.
 
 ## Submit a task with a stable identity
 
+Day-to-day submission, control and recovery commands are owned by the
+`pi-durable` skill (the `skill-pi` series); this document owns the baseline
+deployment, compatibility bounds and rollback.
+
 Use the `durable-worker` role for repository work: it appends its instructions,
 keeps project context and skills, and explicitly includes Code Mode. The
 upstream generic `worker` role replaces the system prompt and has a narrower
