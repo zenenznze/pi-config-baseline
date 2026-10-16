@@ -109,6 +109,36 @@
     "hideThinkingBlock": true,
     "tuiMode": "regular"
   },
+  "durableWorkers": {
+    "package": "npm:pi-durable-subagents@1.0.42",
+    "repository": "https://github.com/purboo/pi-durable-subagents",
+    "npmGitHead": "c63ff881edf62530f8a11dc6ae7f1966fa9da164",
+    "integrity": "sha512-zgxThR+xrgRp2oi7KKWZxVt1M8pfkQXLpmcfF+B1c2oWAal+MX1x7YbDDyqowR5ktBW8Cyc66Hnj5tW9IEDrvA==",
+    "installation": "Separate platform-specific channel; do not add to the universal recommendedPackages on Windows Native",
+    "supportedPlatforms": [
+      "linux",
+      "darwin"
+    ],
+    "automatedDeployment": [
+      "linux-systemd"
+    ],
+    "expectedTools": [
+      "subagents"
+    ],
+    "expectedCommands": [
+      "subagents"
+    ],
+    "configTemplate": "baseline/durable/config.json",
+    "workerRole": "baseline/durable/durable-worker.md",
+    "setup": "node scripts/durable-worker-setup.mjs --plan",
+    "onQuit": "continue",
+    "writerLock": "queue",
+    "boot": "Linux systemd user timer plus user lingering; virtual/container host must also auto-start the instance",
+    "scope": "Explicitly submitted workers only; existing ordinary Pi main sessions are not auto-resumed",
+    "effects": "Use once:true for effectful calls; unknown requires external result reconciliation before follow-up",
+    "codeMode": "Pi CLI 1.1.0 has no durable checkpoints within an unfinished codemode script",
+    "documentation": "docs/durable-workers.md"
+  },
   "recommendedPackages": [
     {
       "id": "pi-skill-palette",

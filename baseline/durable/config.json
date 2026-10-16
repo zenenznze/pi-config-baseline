@@ -1,0 +1,9 @@
+{
+  "onQuit": "continue",
+  "writerLock": "queue",
+  "providers": {
+    "magpie": {
+      "slots": 2
+    }
+  }
+}

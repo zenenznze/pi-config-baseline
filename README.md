@@ -10,6 +10,8 @@ This is **not a Pi Package**: do not run `pi install` on this repository.
 - `baseline/platforms/`: Linux/WSL and Windows Native tool profiles.
 - `scripts/check-config-baseline.mjs`: read-only configuration checker.
 - `snapshot.json`: source revision for this exported snapshot.
+- [Durable workers](docs/durable-workers.md): pinned workers, independent boot
+  starter, effect reconciliation, platform limits and rollback.
 
 Recommended Pi version: **1.1.0** (Node >=22.19.0).
 Code Mode is enabled in hybrid `on` mode; native tools are directly callable.
@@ -53,7 +55,8 @@ A successful check applies only to the inspected installation.
 ## Publication boundary
 
 This repository has independent snapshot history, not the internal Git history.
-Only the baseline, platform profiles and reviewed structural checker are exported.
+Only allowlisted baseline data, platform profiles, reviewed setup/check scripts
+and their documentation are exported.
 Internal release automation, operational records, release evidence, private
 service references, device settings, sessions and credentials are excluded.
 Legacy private Git installation sources are omitted; use the public npm sources.
